@@ -49,6 +49,11 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="dailyMileageQuota" label="日里程配额(km/天)" width="150" align="center">
+          <template #default="{ row }">
+            {{ row.dailyMileageQuota ?? 0 }}
+          </template>
+        </el-table-column>
         <el-table-column prop="description" label="描述" />
         <el-table-column prop="createdAt" label="创建时间" width="180">
           <template #default="{ row }">
@@ -91,6 +96,10 @@
             <el-option label="长距离 (20km以上)" value="LONG" />
           </el-select>
         </el-form-item>
+        <el-form-item label="日里程配额(km/天)" prop="dailyMileageQuota">
+          <el-input-number v-model="form.dailyMileageQuota" :min="0" :max="999" :precision="2" :step="1" />
+          <span class="ml-2 text-xs text-gray-400">绑定该支架每覆盖1天贡献的里程，封账时冻结</span>
+        </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入描述" />
         </el-form-item>
@@ -123,6 +132,7 @@ const form = ref<RackDTO>({
   code: '',
   capacity: 0,
   mileageRange: '',
+  dailyMileageQuota: 0,
   description: ''
 })
 
@@ -177,10 +187,11 @@ const openDialog = (row?: Rack) => {
       code: row.code,
       capacity: row.capacity,
       mileageRange: row.mileageRange,
+      dailyMileageQuota: row.dailyMileageQuota ?? 0,
       description: row.description
     }
   } else {
-    form.value = { code: '', capacity: 0, mileageRange: '', description: '' }
+    form.value = { code: '', capacity: 0, mileageRange: '', dailyMileageQuota: 0, description: '' }
   }
   dialogVisible.value = true
 }

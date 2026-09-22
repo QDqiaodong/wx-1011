@@ -28,7 +28,7 @@ public class RackService {
                 .orElseThrow(() -> new RuntimeException("支架不存在: " + id));
     }
     
-    @Cacheable(value = "rackList", key = "#mileageRange")
+    @Cacheable(value = "rackList", key = "#mileageRange != null ? #mileageRange.name() : 'ALL'")
     public Page<Rack> getList(MileageRange mileageRange, Pageable pageable) {
         if (mileageRange != null) {
             return rackRepository.findByMileageRange(mileageRange, pageable);
@@ -52,8 +52,9 @@ public class RackService {
         rack.setCode(dto.getCode());
         rack.setCapacity(dto.getCapacity());
         rack.setMileageRange(MileageRange.valueOf(dto.getMileageRange()));
+        rack.setDailyMileageQuota(dto.getDailyMileageQuota() != null ? dto.getDailyMileageQuota() : java.math.BigDecimal.ZERO);
         rack.setDescription(dto.getDescription());
-        
+
         return rackRepository.save(rack);
     }
     
@@ -69,8 +70,9 @@ public class RackService {
         rack.setCode(dto.getCode());
         rack.setCapacity(dto.getCapacity());
         rack.setMileageRange(MileageRange.valueOf(dto.getMileageRange()));
+        rack.setDailyMileageQuota(dto.getDailyMileageQuota() != null ? dto.getDailyMileageQuota() : java.math.BigDecimal.ZERO);
         rack.setDescription(dto.getDescription());
-        
+
         return rackRepository.save(rack);
     }
     

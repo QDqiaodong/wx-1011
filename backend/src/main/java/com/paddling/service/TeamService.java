@@ -26,7 +26,7 @@ public class TeamService {
                 .orElseThrow(() -> new RuntimeException("队伍不存在: " + id));
     }
     
-    @Cacheable(value = "teamList", key = "#mileageRange")
+    @Cacheable(value = "teamList", key = "#mileageRange != null ? #mileageRange.name() : 'ALL'")
     public Page<Team> getList(MileageRange mileageRange, Pageable pageable) {
         if (mileageRange != null) {
             return teamRepository.findByTrainingMileage(mileageRange, pageable);

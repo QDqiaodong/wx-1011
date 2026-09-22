@@ -85,28 +85,70 @@ public class BindingService {
     @CacheEvict(value = {"binding", "statistics"}, allEntries = true)
     public Binding update(Long id, BindingUpdateDTO dto) {
         Binding binding = getById(id);
-        
+
         if (!binding.getStatus().equals("ACTIVE")) {
             throw new RuntimeException("绑定关系已失效");
         }
-        
+
         Long oldRackId = binding.getRackId();
-        
+
         if (!oldRackId.equals(dto.getRackId())) {
+            // 校验新支架存在
             rackService.getById(dto.getRackId());
-            
-            BindingHistory history = new BindingHistory();
-            history.setBindingId(id);
-            history.setOldRackId(oldRackId);
-            history.setNewRackId(dto.getRackId());
-            history.setChangeReason(dto.getChangeReason());
-            history.setOperator(dto.getOperator() != null ? dto.getOperator() : "system");
-            bindingHistoryRepository.save(history);
-            
-            binding.setRackId(dto.getRackId());
+            if (bindingRepository.findByRackIdAndTeamIdAndStatus(dto.getRackId(), binding.getTeamId(), "ACTIVE").isPresent()) {
+                throw new RuntimeException("该队伍已绑定该支架");
+            }
+
+            LocalDate changeDate = parseChangeDate(dto.getChangeDate());
+            if (changeDate.isBefore(binding.getStartDate())) {
+                throw new RuntimeException("换绑日期不能早于当前绑定的开始日期: " + binding.getStartDate());
+            }
+
+            // 换绑 = 旧绑定段在换绑当日截止（当日仍归旧支架，与月结算口径一致）
+            binding.setStatus("INACTIVE");
+            binding.setEndDate(changeDate);
+            bindingRepository.save(binding);
+
+            BindingHistory oldHistory = new BindingHistory();
+            oldHistory.setBindingId(id);
+            oldHistory.setOldRackId(oldRackId);
+            oldHistory.setNewRackId(dto.getRackId());
+            oldHistory.setChangeReason(dto.getChangeReason());
+            oldHistory.setOperator(dto.getOperator() != null ? dto.getOperator() : "system");
+            bindingHistoryRepository.save(oldHistory);
+
+            // 新支架绑定段从次日生效 —— 两段首尾相接、不重叠不缺口，月结算时逐段计算
+            LocalDate newStart = changeDate.plusDays(1);
+            Binding newBinding = new Binding();
+            newBinding.setRackId(dto.getRackId());
+            newBinding.setTeamId(binding.getTeamId());
+            newBinding.setStartDate(newStart);
+            newBinding.setStatus("ACTIVE");
+            Binding saved = bindingRepository.save(newBinding);
+
+            BindingHistory newHistory = new BindingHistory();
+            newHistory.setBindingId(saved.getId());
+            newHistory.setOldRackId(oldRackId);
+            newHistory.setNewRackId(dto.getRackId());
+            newHistory.setChangeReason(dto.getChangeReason());
+            newHistory.setOperator(dto.getOperator() != null ? dto.getOperator() : "system");
+            bindingHistoryRepository.save(newHistory);
+
+            return saved;
         }
-        
+
         return bindingRepository.save(binding);
+    }
+
+    private LocalDate parseChangeDate(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return LocalDate.now();
+        }
+        try {
+            return LocalDate.parse(raw.trim());
+        } catch (java.time.format.DateTimeParseException e) {
+            throw new RuntimeException("换绑日期格式错误: " + raw + "，正确格式为 yyyy-MM-dd");
+        }
     }
     
     @Transactional

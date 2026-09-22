@@ -5,6 +5,7 @@ import RackManagement from '@/views/RackManagement.vue'
 import TeamManagement from '@/views/TeamManagement.vue'
 import BindingManagement from '@/views/BindingManagement.vue'
 import StatisticsBoard from '@/views/StatisticsBoard.vue'
+import SettlementBoard from '@/views/SettlementBoard.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -35,6 +36,11 @@ const routes: RouteRecordRaw[] = [
     path: '/statistics',
     name: 'StatisticsBoard',
     component: StatisticsBoard
+  },
+  {
+    path: '/settlements',
+    name: 'SettlementBoard',
+    component: SettlementBoard
   }
 ]
 

@@ -107,6 +107,10 @@
             <el-option v-for="rack in rackOptions" :key="rack.id" :label="rack.code + ' (' + getMileageLabel(rack.mileageRange) + ')'" :value="rack.id" />
           </el-select>
         </el-form-item>
+        <el-form-item label="换绑日期">
+          <el-date-picker v-model="updateForm.changeDate" type="date" value-format="YYYY-MM-DD" placeholder="默认今天" />
+          <span class="ml-2 text-xs text-gray-400">旧绑定计到当日，新绑定次日生效</span>
+        </el-form-item>
         <el-form-item label="变更原因" prop="changeReason">
           <el-input v-model="updateForm.changeReason" type="textarea" :rows="3" placeholder="请输入变更原因" />
         </el-form-item>
@@ -179,7 +183,7 @@ const historyList = ref<BindingHistory[]>([])
 const currentBinding = ref<BindingDTO | null>(null)
 
 const createForm = ref<BindingCreateDTO>({ rackId: 0, teamId: 0 })
-const updateForm = ref<BindingUpdateDTO>({ rackId: 0, changeReason: '', operator: 'system' })
+const updateForm = ref<BindingUpdateDTO>({ rackId: 0, changeReason: '', operator: 'system', changeDate: '' })
 const currentBindingId = ref(0)
 
 const createRules: FormRules = {
@@ -248,7 +252,7 @@ const openCreateDialog = () => {
 const openUpdateDialog = (row: BindingDTO) => {
   currentBinding.value = row
   currentBindingId.value = row.id
-  updateForm.value = { rackId: row.rackId, changeReason: '', operator: 'system' }
+  updateForm.value = { rackId: row.rackId, changeReason: '', operator: 'system', changeDate: '' }
   updateDialogVisible.value = true
 }
 
@@ -279,8 +283,13 @@ const handleUpdate = async () => {
   if (!updateFormRef.value) return
   try {
     await updateFormRef.value.validate()
-    await updateBinding(currentBindingId.value, updateForm.value)
-    ElMessage.success('变更成功')
+    // 空日期不传，由后端默认今天
+    const payload: BindingUpdateDTO = { ...updateForm.value }
+    if (!payload.changeDate) {
+      delete payload.changeDate
+    }
+    await updateBinding(currentBindingId.value, payload)
+    ElMessage.success('变更成功，已生成新绑定段')
     updateDialogVisible.value = false
     fetchBindingList()
   } catch (error: any) {

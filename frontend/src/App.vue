@@ -54,7 +54,8 @@ const menuItems = [
   { path: '/racks', name: '支架管理', icon: '🏗️' },
   { path: '/teams', name: '队伍管理', icon: '👥' },
   { path: '/bindings', name: '绑定管理', icon: '🔗' },
-  { path: '/statistics', name: '统计看板', icon: '📈' }
+  { path: '/statistics', name: '统计看板', icon: '📈' },
+  { path: '/settlements', name: '月度结算', icon: '🧾' }
 ]
 
 const currentPageTitle = computed(() => {

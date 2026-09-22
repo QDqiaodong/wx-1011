@@ -5,6 +5,7 @@ export interface Rack {
   code: string
   capacity: number
   mileageRange: string
+  dailyMileageQuota: number
   description: string
   createdAt: string
   updatedAt: string
@@ -15,6 +16,8 @@ export interface RackDTO {
   code: string
   capacity: number
   mileageRange: string
+  /** 日里程配额（km/天） */
+  dailyMileageQuota?: number
   description?: string
 }
 

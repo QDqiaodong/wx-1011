@@ -23,6 +23,8 @@ export interface BindingUpdateDTO {
   rackId: number
   changeReason: string
   operator?: string
+  /** 换绑日期 yyyy-MM-dd，默认今天；旧绑定计到当日，新绑定次日生效 */
+  changeDate?: string
 }
 
 export interface BindingHistory {

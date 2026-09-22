@@ -14,5 +14,7 @@ public class RackDTO {
     private String code;
     private BigDecimal capacity;
     private String mileageRange;
+    /** 日里程配额（km/天） */
+    private BigDecimal dailyMileageQuota;
     private String description;
 }

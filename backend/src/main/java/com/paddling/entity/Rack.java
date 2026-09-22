@@ -30,7 +30,15 @@ public class Rack {
     @Enumerated(EnumType.STRING)
     @Column(name = "mileage_range", nullable = false, length = 20)
     private MileageRange mileageRange;
-    
+
+    /**
+     * 日里程配额（km/天）：绑定该支架的队伍每覆盖 1 天即贡献该配额的训练里程。
+     * 结算封账时该值会被快照进结算明细，之后修改此处不会影响已封账月份。
+     */
+    @Column(name = "daily_mileage_quota", nullable = false, precision = 8, scale = 2,
+            columnDefinition = "DECIMAL(8,2) NOT NULL DEFAULT 0.00")
+    private BigDecimal dailyMileageQuota = BigDecimal.ZERO;
+
     @Column(name = "description", length = 500)
     private String description;
     
