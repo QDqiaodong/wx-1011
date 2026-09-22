@@ -26,6 +26,13 @@ public class Rack {
     
     @Column(name = "capacity", nullable = false, precision = 10, scale = 2)
     private BigDecimal capacity;
+
+    /**
+     * 日里程配额(km/天)：该支架每天可贡献的训练里程，是月度结算的计价基数。
+     * 注意：只在生成结算单的那一刻读取并快照进结算明细，事后修改不影响已封账月份。
+     */
+    @Column(name = "daily_quota", nullable = false, precision = 10, scale = 2)
+    private BigDecimal dailyQuota;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "mileage_range", nullable = false, length = 20)
